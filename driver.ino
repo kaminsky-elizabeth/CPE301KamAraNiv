@@ -1,5 +1,5 @@
 /*
-  Authors: Mikayla Arabian, Evelyn Nivera, and Elizabeth Kaminsky
+  Authors: Mikayla Arabian, Evelynne Nivera, and Elizabeth Kaminsky
   Date: 5-3-2023
 */
 
