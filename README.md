@@ -1,5 +1,5 @@
 # CPE301KamAraNiv
-CPE 301 Final Project: Elizabeth Kaminsky, Mikayla Arabian, and Evelyn Nivera
+CPE 301 Final Project: Elizabeth Kaminsky, Mikayla Arabian, and Evelynne Nivera
 
 Schedule:
 4/16: finalize timeline and member responsibility for first half. Begin working through project requirements
