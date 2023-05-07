@@ -1,19 +1,15 @@
 //
 // WATER SENSOR
-// Based on lab 7
-// NOTE: Digital write and pin mode functions were just used for ease of testing the threshold. IT WILL NOT BE KEPT IN THE FINAL VERSION.
-// Water sensor uses analog pin 0, while the LED is currently set to digital 7 and 2. 
-//
-// NOTE: Disconnect the water sensor while you're not testing it to help prevent corrosion
-// NOTE: This is not set to link to a main driver. I can edit it to do that later on if we make a main driver.
 // NOTE: The exact water level tends to be a bit scuffed immediately after removing it from water it should even out eventually.
 //Evelynne Nivera
 #define RDA 0x80
 #define TBE 0x20  
 
 //There are 4 states. For now I have set these up as 0 = ERROR, 1 = DISABLED, 2 = IDLE, 3 = RUNNING. 
-int state= 2;
+
 unsigned int threshold = 250;
+
+int state;
 
 volatile unsigned char *myUCSR0A = (unsigned char *)0x00C0;
 volatile unsigned char *myUCSR0B = (unsigned char *)0x00C1;
@@ -32,8 +28,7 @@ void setup()
   U0init(9600);
   // setup the ADC
   adc_init();
-  pinMode(7, OUTPUT);
-  pinMode(2, OUTPUT);
+
 }
 void loop() 
 {
@@ -45,7 +40,7 @@ void loop()
     getInt(data);
     U0getchar();
 
-  //Kind of a prototype for states. Error state is based on the water level.
+  //Error state is based on the water level.
   //As stated above, the digitalwrite functions WILL BE DELETED they are only here to make it easy to check state
   //The water sensor goes off if state is DISABLED. I'm not sure how I want to go about turning it off at the moment maybe 
   //we can discuss this next week. 
@@ -55,16 +50,14 @@ void loop()
     state = 0;
     if(state==0)
     {
-      digitalWrite(7, HIGH);
-      digitalWrite(2, LOW);
+  
     }
   }
   else
   {
     //Sets state to IDLE if water level is above threshold. 
     state = 2;
-    digitalWrite(7, LOW);
-    digitalWrite(2, HIGH);
+
   }
   
   }
