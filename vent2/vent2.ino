@@ -51,8 +51,6 @@ void setup() {
   
   stepper.setSpeed(200);
 
-  //I got lazy so I'm using pinmode/digitalWrite to test the third light this will not be in the final version
-  pinMode(12, OUTPUT);
 }
 
 void loop() {
@@ -60,34 +58,17 @@ void loop() {
   //A10 button is pushed, move stepper in one direction 
   if(*pin_k & 0x04)
   {
-    WRITE_HIGH_PD(0);
-    WRITE_LOW_PE(3);
     stepper.step(20);
-    
   }
-
-  /*else{
-    WRITE_LOW_PD(0);
-    WRITE_HIGH_PE(3);
-   // stepper.step(0);
-  }*/
-
   //A09 button is pushed, move stepper in the other direction 
   if(*pin_k & 0x03)
   {
     stepper.step(-20);
-    digitalWrite(12, HIGH);
-    digitalWrite(5, LOW);
+
   }
   else
   {
-   /* stepper.step(0);
-    digitalWrite(12, LOW);
-       WRITE_HIGH_PE(3);*/
-
-    WRITE_LOW_PD(0);
-    digitalWrite(12, LOW);
-    WRITE_HIGH_PE(3);
+    stepper.step(0);
   }
 
 }
