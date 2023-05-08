@@ -1,11 +1,10 @@
 /*
-  Code part for CPE 301 Final Project
+  1st Code part for CPE 301 Final Project
   Start and stop the fan based on temperature
 */
 
-//example/idea 1
-
-//Robu.in
+//if needed will need to alter the serial.print parts to something else
+//this part of code has been tested and works
 
 #include "DHT.h"
 #include<LiquidCrystal.h>
