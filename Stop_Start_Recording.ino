@@ -1,3 +1,13 @@
+/*
+  2nd Code part for CPE 301 Final Project
+  Stop and start recording
+*/
+
+//runs in testing, though did not record due to nothing being present for recording
+//runs with other fan code
+
+//might need to alter serial print if needed
+
 //#include "MegunoLink.h"
 int relayPin = 11;
 
