@@ -11,9 +11,13 @@
 #define RDA 0x80
 #define TBE 0x20  
 #define DHT11_PIN 7
+#define BUTTON PORTD0
 
 #define WRITE_HIGH_PC(pin_num) *port_c |= (0x01 << pin_num);
 #define WRITE_LOW_PC(pin_num) *port_c &= ~(0x01 << pin_num);
+
+#define WRITE_HIGH_PH(pin_num) *port_h |= (0x01 << pin_num);
+#define WRITE_LOW_PH(pin_num) *port_h &= ~(0x01 << pin_num);
 
 volatile unsigned char* port_k = (unsigned char*) 0x108; 
 volatile unsigned char* ddr_k  = (unsigned char*) 0x107; 
@@ -22,6 +26,10 @@ volatile unsigned char* pin_k  = (unsigned char*) 0x106;
 volatile unsigned char* port_c = (unsigned char*) 0x28;
 volatile unsigned char* ddr_c = (unsigned char*) 0x27;
 volatile unsigned char* pin_c = (unsigned char*) 0x26;
+
+volatile unsigned char* port_h = (unsigned char*) 0x102;
+volatile unsigned char* ddr_h = (unsigned char*) 0x101;
+volatile unsigned char* pin_h = (unsigned char*) 0x100;
 
 volatile unsigned char *myUCSR0A = (unsigned char *)0x00C0;
 volatile unsigned char *myUCSR0B = (unsigned char *)0x00C1;
@@ -34,7 +42,7 @@ volatile unsigned char* my_ADCSRB = (unsigned char*) 0x7B;
 volatile unsigned char* my_ADCSRA = (unsigned char*) 0x7A;
 volatile unsigned int* my_ADC_DATA = (unsigned int*) 0x78;
 
-unsigned int waterThreshold = 220;
+unsigned int waterThreshold = 230;
 
 //state 0 = disabled, state 1 = idle, state 3 = error, state 4 = running
 int state = 0;
@@ -60,6 +68,8 @@ void setup() {
   *port_c |= 0x04;
   *port_c |= 0x07;
 
+
+
     // setup the UART
   U0init(9600);
   // setup the ADC
@@ -68,11 +78,14 @@ void setup() {
   stepper.setSpeed(200);
 
   lcd.begin(16, 2);
+
+  DDRA &= ~(1<<PORTD0);
 }
 
 void loop() {
 
-
+  if (!(PIND & (1 << BUTTON)) == 0)
+  {
     WRITE_HIGH_PC(7);
     WRITE_LOW_PC(4);
     WRITE_LOW_PC(3);
@@ -92,6 +105,8 @@ void loop() {
     WRITE_HIGH_PC(3);
     WRITE_LOW_PC(1);
   }
+  
+  WRITE_HIGH_PH(3);
 
   //display temp
   lcd.print("Temp: ");
@@ -112,8 +127,8 @@ void loop() {
 
   unsigned int data;
   data = adc_read(1);
-  getInt(data);
-  U0getchar();
+  //getInt(data);
+ // U0getchar();
 
   if(data<waterThreshold)
   {
@@ -138,7 +153,16 @@ void loop() {
   {
    stepper.step(-50);
   }
-
+}
+  else
+  {
+    state = 0;
+    lcd.clear();
+    WRITE_LOW_PC(7);
+    WRITE_LOW_PC(4);
+    WRITE_LOW_PC(3);
+    WRITE_HIGH_PC(1);
+  }
   delay(1000);
 }
 
@@ -209,7 +233,7 @@ void U0putchar(unsigned char U0pdata)
 
 //This converts the data to char, so that it can be displayed on the serial plotter. I'm not sure if we'll need this in the end or
 // not but it is usefull for checking the values. It works by splicing up the input data into 1s, 10s, 100s, 1000s position. 
-void getInt(unsigned int data)
+/*void getInt(unsigned int data)
 {
   unsigned int flag = 0;
 
@@ -236,5 +260,5 @@ void getInt(unsigned int data)
 
   U0putchar(data + '0');
   U0putchar('\n');
-}
+}*/
 
