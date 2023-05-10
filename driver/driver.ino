@@ -42,9 +42,9 @@ volatile unsigned char* my_ADCSRB = (unsigned char*) 0x7B;
 volatile unsigned char* my_ADCSRA = (unsigned char*) 0x7A;
 volatile unsigned int* my_ADC_DATA = (unsigned int*) 0x78;
 
-unsigned int waterThreshold = 230;
+unsigned int waterThreshold = 250;
 
-//state 0 = disabled, state 1 = idle, state 3 = error, state 4 = running
+//state 0 = disabled, state 1 = idle, state 2 = error, state 3 = running
 int state = 0;
 int stateCount = 0;
 Stepper stepper(STEPS, 8, 10, 9, 13);
@@ -113,6 +113,17 @@ void loop() {
   lcd.print("Humidity: ");
   lcd.print(DHT.humidity);
   lcd.print("%");
+
+  if(DHT.temperature<18)
+  {
+    state = 1;
+    WRITE_LOW_PE(3);
+  }
+  else
+  {
+    state = 3;
+    WRITE_HIGH_PE(3);
+  }
 
 
 
