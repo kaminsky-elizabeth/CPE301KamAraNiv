@@ -118,7 +118,7 @@ void setup() {
   // initialize the real-time clock
  /* rtc.begin();
   if (!rtc.isrunning()){
-  Serial.println("RTC is not running!");
+
   }
 
   SPI.begin();*/
@@ -139,7 +139,7 @@ void loop() {
   
   if(temp > 30 && !motorOn){
     fanSpeed = map(temp, 30, 50, 0, 255);
-    analogWrite(fanPin, fanSpeed);
+  
     
     // record the time and date the motor was turned on
     DateTime now = rtc.now();
@@ -149,8 +149,7 @@ void loop() {
     motorOn = true;
   } 
   else if(temp < 20 && motorOn){
-    analogWrite(fanPin, 0);
-    
+
     //record the time and date the motor was turned off
     DateTime now = rtc.now();
     MotorEvent event = {false, now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year()};
