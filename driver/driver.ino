@@ -16,8 +16,8 @@
 #define WRITE_HIGH_PC(pin_num) *port_c |= (0x01 << pin_num);
 #define WRITE_LOW_PC(pin_num) *port_c &= ~(0x01 << pin_num);
 
-#define WRITE_HIGH_PH(pin_num) *port_h |= (0x01 << pin_num);
-#define WRITE_LOW_PH(pin_num) *port_h &= ~(0x01 << pin_num);
+#define WRITE_HIGH_PE(pin_num) *port_e |= (0x01 << pin_num);
+#define WRITE_LOW_PE(pin_num) *port_e &= ~(0x01 << pin_num);
 
 volatile unsigned char* port_k = (unsigned char*) 0x108; 
 volatile unsigned char* ddr_k  = (unsigned char*) 0x107; 
@@ -27,9 +27,9 @@ volatile unsigned char* port_c = (unsigned char*) 0x28;
 volatile unsigned char* ddr_c = (unsigned char*) 0x27;
 volatile unsigned char* pin_c = (unsigned char*) 0x26;
 
-volatile unsigned char* port_h = (unsigned char*) 0x102;
-volatile unsigned char* ddr_h = (unsigned char*) 0x101;
-volatile unsigned char* pin_h = (unsigned char*) 0x100;
+volatile unsigned char* port_e = (unsigned char*) 0x2E; 
+volatile unsigned char* ddr_e  = (unsigned char*) 0x2D; 
+volatile unsigned char* pin_e  = (unsigned char*) 0x2C; 
 
 volatile unsigned char *myUCSR0A = (unsigned char *)0x00C0;
 volatile unsigned char *myUCSR0B = (unsigned char *)0x00C1;
@@ -48,7 +48,7 @@ unsigned int waterThreshold = 230;
 int state = 0;
 int stateCount = 0;
 Stepper stepper(STEPS, 8, 10, 9, 13);
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+LiquidCrystal lcd(12, 11, 6, 4, 3, 2);
 
 dht DHT;
 
@@ -63,10 +63,11 @@ void setup() {
   //MAKE SURE THIS IS INCLUDED IN THE FINAL PART 
   *port_k |= 0x04;
 
-  *port_c |= 0x01;
-  *port_c |= 0x03;
-  *port_c |= 0x04;
-  *port_c |= 0x07;
+  *ddr_c |= 0x01;
+  *ddr_c |= 0x03;
+  *ddr_c |= 0x04;
+  *ddr_c |= 0x07;
+  *ddr_e |= 0x08;
 
 
 
@@ -97,16 +98,7 @@ void loop() {
   //set display cursor to column 0 line 0
   lcd.setCursor(0,0); 
 
-  if(DHT.temperature<20)
-  {
-    state = 1;
-    WRITE_LOW_PC(7);
-    WRITE_LOW_PC(4);
-    WRITE_HIGH_PC(3);
-    WRITE_LOW_PC(1);
-  }
-  
-  WRITE_HIGH_PH(3);
+  WRITE_HIGH_PE(3);
 
   //display temp
   lcd.print("Temp: ");
@@ -122,7 +114,6 @@ void loop() {
   lcd.print(DHT.humidity);
   lcd.print("%");
 
-  //delay before looping
 
 
   unsigned int data;
