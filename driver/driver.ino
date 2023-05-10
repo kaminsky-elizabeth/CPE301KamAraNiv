@@ -1,8 +1,14 @@
 /*
   Authors: Mikayla Arabian, Evelynne Nivera, and Elizabeth Kaminsky
   Date: 5-3-2023
+
+  Fan and clock code done by Mikayla Arabian
+  Stepper motor and water sensor code done by Evelynne Nivera
+  LCD and on/off button code by Elizabeth Kaminsky
+
 */
 
+//Libraries
 #include <Stepper.h>
 #include <dht.h>
 #include <LiquidCrystal.h>
@@ -15,9 +21,11 @@
 #define DHT11_PIN 7
 #define BUTTON PORTD0
 
+//For the state lights
 #define WRITE_HIGH_PC(pin_num) *port_c |= (0x01 << pin_num);
 #define WRITE_LOW_PC(pin_num) *port_c &= ~(0x01 << pin_num);
 
+//For the fan
 #define WRITE_HIGH_PE(pin_num) *port_e |= (0x01 << pin_num);
 #define WRITE_LOW_PE(pin_num) *port_e &= ~(0x01 << pin_num);
 
@@ -48,12 +56,13 @@ unsigned int waterThreshold = 250;
 
 //state 0 = disabled, state 1 = idle, state 2 = error, state 3 = running
 int state = 0;
-int stateCount = 0;
+
 Stepper stepper(STEPS, 8, 10, 9, 13);
 LiquidCrystal lcd(12, 11, 6, 4, 3, 2);
 
 dht DHT;
 
+//Code for the clock. It messed with the other code so it is commented out.
 /*RTC_DS1307 rtc; //RTC_DS1307 class for the clock
 
 const int sensorPin = 7; //analog input pin for temperature sensor
@@ -81,20 +90,21 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
  
-  //set PK2 to INPUT
+  //set PK2 to INPUT for buttons
   *ddr_k &= 0xFB;
   
   //enables pullup resistor 
   //MAKE SURE THIS IS INCLUDED IN THE FINAL PART 
   *port_k |= 0x04;
 
+  //Lights and fans as INPUT
   *ddr_c |= 0x01;
   *ddr_c |= 0x03;
   *ddr_c |= 0x04;
   *ddr_c |= 0x07;
   *ddr_e |= 0x08;
 
-    // setup the UART
+  // setup the UART
   U0init(9600);
   // setup the ADC
   adc_init();
@@ -108,7 +118,7 @@ void setup() {
   // initialize the real-time clock
  /* rtc.begin();
   if (!rtc.isrunning()){
-    Serial.println("RTC is not running!");
+  Serial.println("RTC is not running!");
   }
 
   SPI.begin();*/
@@ -116,6 +126,7 @@ void setup() {
 
 void loop() {
 
+  //If the button is not pushed, the whole thing is disabled
   if (!(PIND & (1 << BUTTON)) == 0)
   {
     WRITE_HIGH_PC(7);
@@ -148,7 +159,7 @@ void loop() {
     motorOn = false;
   }*/
 
-    //read info from sensor
+  //read info from sensor
   int chk = DHT.read11(DHT11_PIN);
   //begin lcd display
   //set display cursor to column 0 line 0
@@ -170,16 +181,6 @@ void loop() {
   lcd.print(DHT.humidity);
   lcd.print("%");
 
-  if(DHT.temperature<18)
-  {
-    state = 1;
-    WRITE_LOW_PE(3);
-  }
-  else
-  {
-    state = 3;
-    WRITE_HIGH_PE(3);
-  }
 
 
 
@@ -190,30 +191,53 @@ void loop() {
 
   if(data<waterThreshold)
   {
+    //Puts it into error state
     lcd.clear();
     lcd.print("ERROR: WATER");
     lcd.setCursor(0,1);
     lcd.print("LVL TOO LOW");
-    state = 3;
+    state = 2;
     WRITE_LOW_PC(7);
     WRITE_HIGH_PC(4);
     WRITE_LOW_PC(3);
     WRITE_LOW_PC(1);
   }
+  if(data<waterThreshold && DHT.temperature<18)
+  {
+    state = 1;
+    WRITE_LOW_PC(7);
+    WRITE_LOW_PC(4);
+    WRITE_HIGH_PC(3);
+    WRITE_LOW_PC(1);
 
-  //A10 button is pushed, move stepper in one direction 
+  }
+
+  //A10 button is pushed, move stepper motor in one direction 
   while(*pin_k & 0x04)
   {
     stepper.step(50);
   }
-  //A09 button is pushed, move stepper in the other direction 
+  //A09 button is pushed, move stepper motor in the other direction 
   while(*pin_k & 0x03)
   {
    stepper.step(-50);
   }
+
+  /*
+  if(DHT.temperature<18)
+  {
+    state = 1;
+    WRITE_LOW_PE(3);
+  }
+  if(DHT.temperature>18 && state!=2)
+  {
+    state = 3;
+    WRITE_HIGH_PE(3);
+  }*/
 }
   else
   {
+    //Disabled state
     state = 0;
     lcd.clear();
     WRITE_LOW_PC(7);
