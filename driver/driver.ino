@@ -27,7 +27,7 @@ volatile unsigned char* my_ADCSRB = (unsigned char*) 0x7B;
 volatile unsigned char* my_ADCSRA = (unsigned char*) 0x7A;
 volatile unsigned int* my_ADC_DATA = (unsigned int*) 0x78;
 
-unsigned int waterThreshold = 250;
+unsigned int waterThreshold = 220;
 int state = 0;
 int stateCount = 0;
 Stepper stepper(STEPS, 8, 10, 9, 13);
@@ -86,6 +86,15 @@ void loop() {
   data = adc_read(1);
   getInt(data);
   U0getchar();
+
+  if(data<waterThreshold)
+  {
+    lcd.clear();
+    lcd.print("ERROR: WATER");
+    lcd.setCursor(0,1);
+    lcd.print("LVL TOO LOW");
+    state = 3;
+  }
 
   //A10 button is pushed, move stepper in one direction 
   while(*pin_k & 0x04)
