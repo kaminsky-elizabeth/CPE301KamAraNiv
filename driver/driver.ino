@@ -6,6 +6,8 @@
 #include <Stepper.h>
 #include <dht.h>
 #include <LiquidCrystal.h>
+#include <RTClib.h>
+#include <SPI.h>
 
 #define STEPS 50
 #define RDA 0x80
@@ -52,6 +54,29 @@ LiquidCrystal lcd(12, 11, 6, 4, 3, 2);
 
 dht DHT;
 
+/*RTC_DS1307 rtc; //RTC_DS1307 class for the clock
+
+const int sensorPin = 7; //analog input pin for temperature sensor
+const int fanPin = 6; //PWM output pin for fan motor
+
+int temp;
+int fanSpeed;
+bool motorOn = false;
+
+struct MotorEvent{
+  bool isOn;
+  uint8_t hour;
+  uint8_t minute;
+  uint8_t second;
+  uint8_t day;
+  uint8_t month;
+  uint16_t year;
+};
+
+const int MAX_EVENTS = 100;
+MotorEvent motorEvents[MAX_EVENTS];
+int numEvents = 0;*/
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -69,8 +94,6 @@ void setup() {
   *ddr_c |= 0x07;
   *ddr_e |= 0x08;
 
-
-
     // setup the UART
   U0init(9600);
   // setup the ADC
@@ -81,6 +104,14 @@ void setup() {
   lcd.begin(16, 2);
 
   DDRA &= ~(1<<PORTD0);
+
+  // initialize the real-time clock
+ /* rtc.begin();
+  if (!rtc.isrunning()){
+    Serial.println("RTC is not running!");
+  }
+
+  SPI.begin();*/
 }
 
 void loop() {
@@ -91,6 +122,31 @@ void loop() {
     WRITE_LOW_PC(4);
     WRITE_LOW_PC(3);
     WRITE_LOW_PC(1);
+
+  /*temp = analogRead(sensorPin);
+  temp = (5.0 * temp * 100.0) / 1024.0; //converting analog value to temperature in Celsius
+  
+  if(temp > 30 && !motorOn){
+    fanSpeed = map(temp, 30, 50, 0, 255);
+    analogWrite(fanPin, fanSpeed);
+    
+    // record the time and date the motor was turned on
+    DateTime now = rtc.now();
+    MotorEvent event = {true, now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year()};
+    motorEvents[numEvents++] = event;
+    
+    motorOn = true;
+  } 
+  else if(temp < 20 && motorOn){
+    analogWrite(fanPin, 0);
+    
+    //record the time and date the motor was turned off
+    DateTime now = rtc.now();
+    MotorEvent event = {false, now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year()};
+    motorEvents[numEvents++] = event;
+    
+    motorOn = false;
+  }*/
 
     //read info from sensor
   int chk = DHT.read11(DHT11_PIN);
@@ -233,34 +289,11 @@ void U0putchar(unsigned char U0pdata)
   *myUDR0 = U0pdata;
 }
 
-//This converts the data to char, so that it can be displayed on the serial plotter. I'm not sure if we'll need this in the end or
-// not but it is usefull for checking the values. It works by splicing up the input data into 1s, 10s, 100s, 1000s position. 
-/*void getInt(unsigned int data)
-{
-  unsigned int flag = 0;
-
-  if(data >=1000)
-  {
-    U0putchar ((data/1000) + '0');
-    data = data % 1000;
-    flag = 1;
+/*void sendMotorEvents(){
+  for(int i = 0; i < numEvents; i++){
+    MotorEvent event = motorEvents[i];
+    byte data[9];
+    data[0] = event.isOn;
   }
-
-  if(data >=100 || flag ==1)
-  {
-    U0putchar((data/100) + '0');
-    data = data % 100;
-    flag = 1;
-  }
-
-  if(data >=10 || flag ==1)
-  {
-    U0putchar((data/10) + '0');
-    data = data % 10;
-    flag =1;
-  }
-
-  U0putchar(data + '0');
-  U0putchar('\n');
 }*/
 
