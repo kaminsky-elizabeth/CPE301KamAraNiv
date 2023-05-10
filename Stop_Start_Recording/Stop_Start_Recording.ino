@@ -3,43 +3,77 @@
   Stop and start recording
 */
 
-//runs in testing, though did not record due to nothing being present for recording
-//runs with other fan code
+#include <RTClib.h>
+#include <SPI.h>
 
-//might need to alter serial print if needed
+RTC_DS1307 rtc; //RTC_DS1307 class for the clock
 
-//#include "MegunoLink.h"
-int relayPin = 11;
+const int sensorPin = 7; //analog input pin for temperature sensor
+const int fanPin = 6; //PWM output pin for fan motor
 
-//TimePlot MyPlot;
-void setup()
-{
-  Serial.begin(9600);
-  pinMode(relayPin, OUTPUT);
-  Serial.println("Analog Sensor Plotter");
-}
+int temp;
+int fanSpeed;
+bool motorOn = false;
 
-void loop()
-{
-  digitalWrite(relayPin, HIGH);
-  runL();
-  Serial.println(" LED OFF");
-  digitalWrite(relayPin, LOW);
-  delay(1000);      // added to show off time
-}
+struct MotorEvent{
+  bool isOn;
+  uint8_t hour;
+  uint8_t minute;
+  uint8_t second;
+  uint8_t day;
+  uint8_t month;
+  uint16_t year;
+};
 
-void runL()
-{
-  for ( int x = 0; x < 10; x++)
-  {
+const int MAX_EVENTS = 100;
+MotorEvent motorEvents[MAX_EVENTS];
+int numEvents = 0;
 
-    //float SensorValue = analogRead(3);
-    //float voltage = SensorValue * (5.0 / 1023.0);
-    //MyPlot.SendData("My Sensor", voltage);
-    Serial.print(" x = ");
-    Serial.print(x);
-    Serial.println("LED ON");
-    delay(1000);
+void setup(){
+  pinMode(fanPin, OUTPUT); // set fan pin as output
+  
+  // initialize the real-time clock
+  rtc.begin();
+  if (!rtc.isrunning()){
+    Serial.println("RTC is not running!");
   }
 
+  SPI.begin();
+}
+
+void loop(){
+  temp = analogRead(sensorPin);
+  temp = (5.0 * temp * 100.0) / 1024.0; //converting analog value to temperature in Celsius
+  
+  if(temp > 30 && !motorOn){
+    fanSpeed = map(temp, 30, 50, 0, 255);
+    analogWrite(fanPin, fanSpeed);
+    
+    // record the time and date the motor was turned on
+    DateTime now = rtc.now();
+    MotorEvent event = {true, now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year()};
+    motorEvents[numEvents++] = event;
+    
+    motorOn = true;
+  } 
+  else if(temp < 20 && motorOn){
+    analogWrite(fanPin, 0);
+    
+    //record the time and date the motor was turned off
+    DateTime now = rtc.now();
+    MotorEvent event = {false, now.hour(), now.minute(), now.second(), now.day(), now.month(), now.year()};
+    motorEvents[numEvents++] = event;
+    
+    motorOn = false;
+  }
+  
+  delay(1000);
+}
+
+void sendMotorEvents(){
+  for(int i = 0; i < numEvents; i++){
+    MotorEvent event = motorEvents[i];
+    byte data[9];
+    data[0] = event.isOn;
+  }
 }
