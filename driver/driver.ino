@@ -6,6 +6,8 @@
   Stepper motor and water sensor code done by Evelynne Nivera
   LCD and on/off button code by Elizabeth Kaminsky
 
+  NOTE: Only the driver is needed. The other files were used to test individual components but only this one should be used.
+
 */
 
 //Libraries
