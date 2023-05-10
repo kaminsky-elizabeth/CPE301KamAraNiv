@@ -28,6 +28,8 @@ volatile unsigned char* my_ADCSRA = (unsigned char*) 0x7A;
 volatile unsigned int* my_ADC_DATA = (unsigned int*) 0x78;
 
 unsigned int waterThreshold = 220;
+
+//state 0 = disabled, state 1 = idle, state 3 = error, state 4 = running
 int state = 0;
 int stateCount = 0;
 Stepper stepper(STEPS, 8, 10, 9, 13);
