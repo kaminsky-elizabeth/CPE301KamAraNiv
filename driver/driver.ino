@@ -182,7 +182,14 @@ void loop() {
   lcd.print(DHT.humidity);
   lcd.print("%");
 
-
+  if(DHT.temperature<18)
+  {
+    state = 1;
+    WRITE_LOW_PC(7);
+    WRITE_LOW_PC(4);
+    WRITE_HIGH_PC(3);
+    WRITE_LOW_PC(1);
+  }
 
 
   unsigned int data;
@@ -203,7 +210,7 @@ void loop() {
     WRITE_LOW_PC(3);
     WRITE_LOW_PC(1);
   }
-  if(data<waterThreshold && DHT.temperature<18)
+  if(data>waterThreshold && DHT.temperature<18)
   {
     state = 1;
     WRITE_LOW_PC(7);
